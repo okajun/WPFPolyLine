@@ -8,5 +8,6 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Rectangle Name="Box" Margin="0,0,0,0"/>
+        <Label Name="Time" Margin="8" Width="200" Height="30" Background="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" HorizontalContentAlignment="Right"  />
     </Grid>
 </Window>

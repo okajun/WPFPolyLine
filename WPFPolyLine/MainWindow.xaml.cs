@@ -106,16 +106,19 @@ namespace WPFPolyLine
                 return;
             }
             ctx.BeginFigure(points.First(), true, true);
-            ctx.PolyLineTo(new PointList(points.Skip(1), countOfPoints - 1), true, false);
+            //ctx.PolyLineTo(new PointList(points.Skip(1), countOfPoints - 1), true, false);
+            ctx.PolyLineTo(new PointList(points, countOfPoints), true, false);
         }
+
         private void DrawPolygonCopyList(StreamGeometryContext ctx, IList<Point> points)
         {
             if (2 > points.Count)
             {
                 return;
             }
-            ctx.BeginFigure(points.First(), true, true);
-            ctx.PolyLineTo(points.Skip(1).ToList(), true, false);
+            ctx.BeginFigure(points[0], true, true);
+            //ctx.PolyLineTo(points.Skip(1).ToArray(), true, false);
+            ctx.PolyLineTo(points, true, false);
         }
 
         private readonly Drawing drawing;
@@ -132,19 +135,28 @@ namespace WPFPolyLine
             };
             var geometry = new StreamGeometry();
             geometry.FillRule = FillRule.Nonzero;
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             using (var ctx = geometry.Open())
             {
-                for (int i = 0; i < 10; ++i)
+                for (int y = 0; y < 100; ++y)
                 {
-                    //DrawPolygonCopyList(ctx, points.Select(p => Point.Add(p, new Vector(i * 40d, 0d))).ToList());
-                    DrawPolygonEnumeratable(ctx, points.Select(p => Point.Add(p, new Vector(i * 40d, 0d))), points.Length);
+                    for (int x = 0; x < 100; ++x)
+                    {
+                        //DrawPolygonCopyList(ctx, points.Select(p => Point.Add(p, new Vector(x * 40d, y * 40d))).ToList());
+                        DrawPolygonEnumeratable(ctx, points.Select(p => Point.Add(p, new Vector(x * 40d, y * 40d))), points.Length);
+                    }
                 }
             }
+            stopwatch.Stop();
+            var microsec = stopwatch.ElapsedTicks * 10000 / System.Diagnostics.Stopwatch.Frequency;
+            this.Time.Content = string.Format($"{microsec}µs");
+
             geometry.Freeze();
-            drawing = new GeometryDrawing(Brushes.Red, null, geometry);
+            var pen = new Pen() { Brush = Brushes.Black, Thickness = 1d, };
+            drawing = new GeometryDrawing(Brushes.Red, pen, geometry);
             drawing.Freeze();
 
-            SizeChanged += (s, e) =>
+            Box.SizeChanged += (s, e) =>
             {
                 var viewport = new Rect(0d, 0d, Box.ActualWidth, Box.ActualHeight);
                 var fillBrush = new DrawingBrush()
